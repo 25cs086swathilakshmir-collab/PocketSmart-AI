@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PocketSmart AI</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">PocketSmart AI</div>
+
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+        </nav>
+    </header>
+
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <h1>Your Smart Budget & Recommendation Assistant</h1>
+
+            <p>
+                Plan your budget and get personalized
+                AI-powered recommendations according to your needs.
+            </p>
+
+            <a href="#features" class="start-btn">
+                Get Started
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- Features -->
+    <section class="features" id="features">
+
+        <h2>What do you want to plan?</h2>
+
+        <p class="subtitle">
+            Choose a category and let PocketSmart AI help you.
+        </p>
+
+        <div class="card-container">
+
+            <div class="card">
+
+                <div class="icon">🏠</div>
+
+                <h3>Home Interior</h3>
+
+                <p>
+                    Plan your home decoration according
+                    to your budget and preferences.
+                </p>
+
+                <button onclick="showForm('home')">
+                    Plan Home
+                </button>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="icon">🎉</div>
+
+                <h3>Party Planning</h3>
+
+                <p>
+                    Plan your party expenses and get
+                    suitable recommendations.
+                </p>
+
+                <button onclick="showForm('party')">
+                    Plan Party
+                </button>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="icon">💎</div>
+
+                <h3>Jewelry Recommendations</h3>
+
+                <p>
+                    Find jewelry recommendations based
+                    on your budget and preferences.
+                </p>
+
+                <button onclick="showForm('jewelry')">
+                    Find Jewelry
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Form -->
+    <section class="form-section">
+
+        <div class="form-box">
+
+            <h2 id="form-title">
+                Select a category
+            </h2>
+
+            <form id="recommendation-form">
+
+                <label for="budget">
+                    Your Budget
+                </label>
+
+                <input
+                    type="number"
+                    id="budget"
+                    placeholder="Enter your budget"
+                    required
+                >
+
+                <label for="requirements">
+                    Your Requirements
+                </label>
+
+                <textarea
+                    id="requirements"
+                    placeholder="Tell us what you need..."
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    Get AI Recommendations
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- Results -->
+    <section class="result-section">
+
+        <h2>AI Recommendations</h2>
+
+        <div id="result">
+
+            <p>
+                Your personalized recommendations
+                will appear here.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer id="about">
+
+        <h3>PocketSmart AI</h3>
+
+        <p>
+            Your smart budget and recommendation assistant.
+        </p>
+
+        <p>
+            © 2026 PocketSmart AI
+        </p>
+
+    </footer>
+
+
+    <!-- JavaScript -->
+    <script>
+
+        let selectedCategory = "";
+
+
+        function showForm(category) {
+
+            selectedCategory = category;
+
+            const title =
+                document.getElementById("form-title");
+
+
+            if (category === "home") {
+
+                title.innerText =
+                    "Home Interior Planning";
+
+            } else if (category === "party") {
+
+                title.innerText =
+                    "Party Budget Planning";
+
+            } else if (category === "jewelry") {
+
+                title.innerText =
+                    "Jewelry Recommendations";
+
+            }
+
+
+            document
+                .querySelector(".form-section")
+                .scrollIntoView({
+                    behavior: "smooth"
+                });
+        }
+
+
+        document
+            .getElementById("recommendation-form")
+            .addEventListener("submit", async function(event) {
+
+                event.preventDefault();
+
+
+                const budget =
+                    document.getElementById("budget").value;
+
+                const requirements =
+                    document.getElementById("requirements").value;
+
+                const result =
+                    document.getElementById("result");
+
+
+                if (selectedCategory === "") {
+
+                    result.innerHTML = `
+                        <div class="result-card">
+                            <h3>⚠️ Select a category first</h3>
+                            <p>
+                                Please choose a category first.
+                            </p>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+
+                result.innerHTML = `
+                    <div class="result-card">
+                        <h3>🤖 PocketSmart AI is thinking...</h3>
+                        <p>
+                            Gemini is preparing your recommendation.
+                        </p>
+                    </div>
+                `;
+
+
+                try {
+
+                    const response = await fetch(
+                        "/recommend",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify({
+
+                                category: selectedCategory,
+
+                                budget: Number(budget),
+
+                                requirements: requirements
+
+                            })
+                        }
+                    );
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Backend error"
+                        );
+
+                    }
+
+
+                    const data =
+                        await response.json();
+
+
+                    result.innerHTML = `
+                        <div class="result-card">
+
+                            <h3>
+                                ✨ Your PocketSmart Recommendation
+                            </h3>
+
+                            <p>
+                                ${data.recommendation.replace(/\n/g, "<br>")}
+                            </p>
+
+                        </div>
+                    `;
+
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    result.innerHTML = `
+                        <div class="result-card">
+
+                            <h3>
+                                ⚠️ Something went wrong
+                            </h3>
+
+                            <p>
+                                Unable to connect to PocketSmart AI.
+                                Please check the server.
+                            </p>
+
+                        </div>
+                    `;
+
+                }
+
+
+                document
+                    .querySelector(".result-section")
+                    .scrollIntoView({
+                        behavior: "smooth"
+                    });
+
+            });
+
+    </script>
+
+</body>
+
+</html>
